@@ -6,8 +6,7 @@ This project performs Market Basket Analysis on a UK-based non-store online reta
 The primary notebook for this analysis is `online-retail-transaction.ipynb`.
 
 ## 📊 Dataset Information
-**Dataset:** Online Retail Dataset - Ulrik Thyge Pedersen  
-**Link:** [[Online Retail Dataset](https://www.kaggle.com/datasets/ulrikthygepedersen/online-retail-dataset)]  
+**Dataset:** [Online Retail Dataset](https://www.kaggle.com/datasets/ulrikthygepedersen/online-retail-dataset) - Ulrik Thyge Pedersen
 
 This dataset contains transactional data with the following attributes:
 * **InvoiceNo:** Invoice number. Nominal, a 6-digit integral number uniquely assigned to each transaction. If this code starts with letter 'c', it indicates a cancellation.
