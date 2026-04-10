@@ -6,42 +6,53 @@ This project performs Market Basket Analysis on a UK-based non-store online reta
 The primary notebook for this analysis is `online-retail-transaction.ipynb`.
 
 ## 📊 Dataset Information
-**Dataset:** [Online Retail Dataset](https://www.kaggle.com/datasets/ulrikthygepedersen/online-retail-dataset) - Ulrik Thyge Pedersen
+**Dataset Source:** [Online Retail Dataset - UCI Machine Learning Repository](https://archive.ics.uci.edu/dataset/352/online+retail)
+**Original Creator:** Dr. Daqing Chen (2015)
 
 This dataset contains transactional data with the following attributes:
-* **InvoiceNo:** Invoice number. Nominal, a 6-digit integral number uniquely assigned to each transaction. If this code starts with letter 'c', it indicates a cancellation.
-* **StockCode:** Product (item) code. Nominal, a 5-digit integral number uniquely assigned to each distinct product.
-* **Description:** Product (item) name. Nominal.
-* **Quantity:** The quantities of each product (item) per transaction. Numeric.
-* **InvoiceDate:** Invoice Date and time. Numeric, the day and time when each transaction was generated.
-* **UnitPrice:** Unit price. Numeric, Product price per unit in sterling.
-* **CustomerID:** Customer number. Nominal, a 5-digit integral number uniquely assigned to each customer.
-* **Country:** Country name. Nominal, the name of the country where each customer resides.
+* **InvoiceNo:** Invoice number. A 6-digit integral number. If it starts with 'C', it indicates a cancellation.
+* **StockCode:** Product (item) code. A 5-digit integral number uniquely assigned to each distinct product.
+* **Description:** Product (item) name.
+* **Quantity:** The quantities of each product (item) per transaction.
+* **InvoiceDate:** The day and time when each transaction was generated.
+* **UnitPrice:** Product price per unit in sterling (£).
+* **CustomerID:** A 5-digit integral number uniquely assigned to each customer.
+* **Country:** The name of the country where each customer resides.
 
 ## 🛠️ Methodology & Data Cleansing
 Real-world retail data is incredibly messy. This project implements a rigorous data preprocessing pipeline to ensure the resulting recommendation rules are mathematically sound and business-relevant:
 
-1. **Handling Returns & Cancellations:** Filtered out invoices starting with 'C' and transactions where `Quantity <= 0` to prevent returned items from being algorithmically treated as "purchases".
-2. **Noise Reduction:** Removed non-physical "administrative" items (e.g., "POST" for postage, "M" for manual entry, "D" for discount) using regex matching on `StockCode`. This prevents postage and fees from skewing the association rules.
-3. **Entity Resolution:** Grouped basket items strictly by `StockCode` rather than text `Description`. This prevents the support of a single item from being fractured across multiple slightly different text descriptions.
-4. **Geographical Scoping:** Filtered the dataset to only include transactions from the `"United Kingdom"` to isolate domestic retail behavior from international wholesale behavior.
+1. **Handling Returns:** Filtered out invoices starting with 'C' and transactions where `Quantity <= 0`.
+2. **Noise Reduction:** Removed non-physical "administrative" items (e.g., "POST" for postage, "M" for manual entry) using regex matching on `StockCode`.
+3. **Entity Resolution:** Grouped basket items strictly by `StockCode` rather than text `Description` to prevent support fracturing, then mapped back to standardized names.
+4. **Geographical Scoping:** Filtered the dataset to only include transactions from the `"United Kingdom"` to isolate domestic retail behavior.
 
-## 🧠 Modeling: FP-Growth
-To overcome the severe memory and processing bottlenecks associated with traditional Apriori algorithms, this project utilizes **FP-Growth** via the `mlxtend` library. 
-* **Matrix Discretization:** Transaction quantities are converted to efficient boolean types (`True/False`).
-* **Support & Confidence:** The model isolates frequent itemsets with a minimum support of **3%** and filters for strong rules with a minimum confidence of **50%** and a positive Lift (`Lift > 1`).
+## 🧠 Modeling & Benchmark
+To overcome the severe memory and processing bottlenecks associated with traditional algorithms, this project utilizes **FP-Growth**. 
+* **Algorithm Benchmark:** Experimental results demonstrated that FP-Growth significantly outperforms Apriori in execution time and memory efficiency when dealing with low support thresholds (e.g., < 0.5%), completely avoiding the candidate explosion problem.
+* **Parameter Tuning:** The model isolates frequent itemsets with a minimum support of **2%** (capturing high-value niche markets) and filters for strong rules with a minimum confidence of **40%** and a positive correlation (`Lift > 1`).
 
-## 🚀 Results & Output
-The script outputs highly actionable, business-ready insights rather than raw data tables. 
+## 📈 Visualizations
+The project goes beyond raw data tables by providing actionable visual insights:
+* **Scatter Plot Analysis:** Visualizing the distribution of Support, Confidence, and Lift to identify the "golden" product pairs.
+* **Network Graph topology:** Mapping product communities (e.g., the "Regency Teacup" cross-selling network vs. the "Jumbo Bag" hub-and-spoke structure) to guide product bundling strategies.
 
-**Example Output:**
-> **IF a customer buys:** [PINK REGENCY TEACUP AND SAUCER]  
+## 🚀 Results & Business Implications
+The script outputs highly actionable, business-ready insights rather than raw data. 
+
+**Example of a High-Value Multi-Item Rule:**
+> **IF a customer buys:** [PINK REGENCY TEACUP AND SAUCER, ROSES REGENCY TEACUP AND SAUCER]  
 > **Then the best item to recommend is:** [GREEN REGENCY TEACUP AND SAUCER]  
-> **Confidence:** 82.08% | **Support:** 3.09% | **Lift:** 16.42x  
+> **Confidence:** 90.29% | **Support:** 2.64% | **Lift:** 18.06x  
 
-These statements can be directly implemented into e-commerce "Frequently Bought Together" UI features or used for targeted email marketing campaigns.
+These insights are directly applicable to:
+1. **UI/UX Optimization:** Dynamic "Frequently Bought Together" widgets.
+2. **Product Bundling:** Creating targeted combo deals to increase Average Order Value (AOV).
+3. **Targeted Marketing:** Automated email retargeting based on complementary items.
 
 ## 💻 Requirements
-To run this notebook, you will need the following Python libraries installed:
-* `pandas`
-* `mlxtend`
+To run this notebook, ensure you have the following Python libraries installed:
+```bash
+pip install pandas numpy mlxtend matplotlib seaborn networkx
+```
+Note: If you wish to run the algorithm performance benchmark, you may also need to install the pyfim library, which requires a C compiler.
